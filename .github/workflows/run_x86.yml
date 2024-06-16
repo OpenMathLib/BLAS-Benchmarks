@@ -95,6 +95,6 @@ jobs:
 
           python -c'import scipy_openblas32 as sc; print(sc.__version__, "\n\n", sc.get_openblas_config())' > msg.txt
           git commit -m "Update benchmarks `cat msg.txt` "
-        #  git push origin main
+          #  git push origin main
           git remote -v
 
