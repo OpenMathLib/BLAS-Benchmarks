@@ -7,7 +7,7 @@ on:
 
 env:
 #  GITHUB_TOKEN: ${{ secrets.OB_BENCH_TOKEN }}
-#  BENCHMARKS_REPO: ev-br/ob-bench-asv
+  RESULTS_DIR_ROOT: gh_pages 
   ASV_CONFIG: asv.conf.json
   MACHINE_NAME: github-actions-x86  # to identify github actions machine as hostname changes everytime
 
@@ -51,7 +51,39 @@ jobs:
         run: |
           echo ${{ github.workspace}}
           asv run --config $ASV_CONFIG -v
+          asv publish --config $ASV_CONFIG -v
         env:
           PKG_CONFIG_PATH: ${{ github.workspace }}
+
+      - name: Copy results to a gh-pages branch clone
+        run: |
+          git clone -b gh-pages --single-branch https://github.com/OpenMathLib/BLAS-Benchmarks.git ~/$RESULTS_DIR_ROOT
+          echo ">>>> clone done"
+
+          RESULTS_DIR=~/$RESULTS_DIR_ROOT/results
+          if [ -d "$RESULTS_DIR" ]
+          then
+            echo ">> "results/$MACHINE_NAME
+            ls -l 
+
+            cp -r $RESULTS_DIR/$MACHINE_NAME/* .asv/results/$MACHINE_NAME/
+          else
+            echo "results/ directory does not exist in the benchmarks repository"
+            mkdir -p $RESULTS_DIR
+          fi
+
+          asv publish --config $ASV_CONFIG -v
+          echo ">>> ."
+          ls -l .
+          echo ">>> .asv"
+          ls -l .asv
+          echo ">>> .asv/results"
+          ls -l .asv/results
+
+          cp -r .asv/html/* ~/$RESULTS_DIR_ROOT/
+          cp -r .asv/results ~/$RESULTS_DIR_ROOT/
+
+          echo ">>> @ " $RESULTS_DIR_ROOT
+          ls -l ~/$RESULTS_DIR_ROOT
 
 
