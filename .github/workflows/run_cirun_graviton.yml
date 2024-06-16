@@ -3,12 +3,7 @@ name: ASV Benchmark on arm64 graviton cirun
 on:
   push:
     branches:
-      - develop
-      - release-**
-  pull_request:
-    branches:
-      - develop
-      - release-**
+      - main
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
