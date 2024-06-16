@@ -97,4 +97,5 @@ jobs:
           git commit -m "Update benchmarks `cat msg.txt` "
           #  git push origin main
           git remote -v
+          git push origin:gh-pages
 
