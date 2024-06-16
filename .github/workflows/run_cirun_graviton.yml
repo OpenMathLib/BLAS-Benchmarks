@@ -1,0 +1,91 @@
+name: ASV Benchmark on arm64 graviton cirun
+
+on:
+  push:
+    branches:
+      - develop
+      - release-**
+  pull_request:
+    branches:
+      - develop
+      - release-**
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read # to fetch code (actions/checkout)
+
+env:
+ # GITHUB_TOKEN: ${{ secrets.OB_BENCH_TOKEN }}
+ # BENCHMARKS_REPO: ev-br/ob-bench-asv
+  ASV_CONFIG: asv.conf.json
+  MACHINE_NAME: github-actions-cirun-graviton  # to identify github actions machine as hostname changes everytime
+
+jobs:
+  build:
+    if: "github.repository == 'OpenMathLib/BLAS-Benchmarks'"
+    runs-on: "cirun-aws-runner-graviton--${{ github.run_id }}"
+
+    strategy:
+      fail-fast: false
+      matrix:
+        fortran: [gfortran]
+        build: [make]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # To fetch all commits to be able to generate benchmarks html
+
+      - name: Print system information
+        run: |
+          if [ "$RUNNER_OS" == "Linux" ]; then
+            cat /proc/cpuinfo
+          else
+            echo "::error::$RUNNER_OS not supported"
+            exit 1
+          fi
+
+      - name: Install system dependencies
+        run: |
+          if [ "$RUNNER_OS" == "Linux" ]; then
+            sudo apt update
+            sudo apt-get install -y gfortran cmake ccache libtinfo5 python3-pip pkg-config
+          else
+            echo "::error::$RUNNER_OS not supported"
+            exit 1
+          fi
+
+      - name: Install python dependencies
+        run: |
+          pip3 install numpy meson meson-python ninja build asv virtualenv
+          # pip3 install scipy_openblas32
+          # install the nightly OpenBLAS wheel
+          pip install -i https://pypi.anaconda.org/scientific-python-nightly-wheels/simple scipy-openblas32
+          python3 -c'import scipy_openblas32 as so; print(so.get_pkg_config())' > scipy_openblas.pc
+          export PKG_CONFIG_PATH=$PWD
+          echo ">>>> PKG_CONFIG" $PKG_CONFIG_PATH
+          cat scipy_openblas.pc
+
+      - name: Set and log asv machine configuration
+        run: |
+          cd benchmark/pybench/asv
+          python3 -m asv machine --yes --config asv.conf.json
+          echo "Machine Configuration:"
+          cat ~/.asv-machine.json
+          rm ~/.asv-machine.json
+
+          echo "Setting machine name to $MACHINE_NAME"
+          python3 -m asv machine --machine $MACHINE_NAME --yes --config $ASV_CONFIG -v
+          cat ~/.asv-machine.json
+
+      - name: Run benchmarks
+        run: |
+          echo ${{ github.workspace}}
+          cd benchmark/pybench/asv
+          python3 -m asv run --config $ASV_CONFIG -v
+        env:
+          PKG_CONFIG_PATH: ${{ github.workspace }}
+
