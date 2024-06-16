@@ -1,0 +1,13 @@
+libdir=/home/br/mambaforge/envs/asv_openblas/lib/python3.11/site-packages/scipy_openblas32/lib
+includedir=/home/br/mambaforge/envs/asv_openblas/lib/python3.11/site-packages/scipy_openblas32/include
+openblas_config= OpenBLAS 0.3.27.dev DYNAMIC_ARCH NO_AFFINITY Haswell MAX_THREADS=64
+version=0.3.27.dev
+extralib=-lm -lpthread -lgfortran -lquadmath -L${libdir} -lscipy_openblas
+Name: openblas
+Description: OpenBLAS is an optimized BLAS library based on GotoBLAS2 1.13 BSD version
+Version: ${version}
+URL: https://github.com/xianyi/OpenBLAS
+Libs: ${libdir}/libscipy_openblas.so -Wl,-rpath,${libdir}
+Libs.private: ${extralib}
+Cflags: -I${includedir} -DBLAS_SYMBOL_PREFIX=scipy_
+
