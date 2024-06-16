@@ -1,0 +1,57 @@
+name: Benchmarks
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+#  GITHUB_TOKEN: ${{ secrets.OB_BENCH_TOKEN }}
+#  BENCHMARKS_REPO: ev-br/ob-bench-asv
+  ASV_CONFIG: asv.conf.json
+  MACHINE_NAME: github-actions-x86  # to identify github actions machine as hostname changes everytime
+
+jobs:
+  build:
+    # This workflow only runs on the origin org
+    #if: github.repository_owner == 'sgkit-dev'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # To fetch all commits to be able to generate benchmarks html
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          pip install numpy meson meson-python ninja build asv
+          # sudo apt install libopenblas-dev    # XXX
+          # pip install scipy_openblas32
+          # install a nightly OpenBLAS wheel
+          pip install -i https://pypi.anaconda.org/scientific-python-nightly-wheels/simple scipy-openblas32
+          python -c'import scipy_openblas32 as so; print(so.get_pkg_config())' > scipy_openblas.pc
+          export PKG_CONFIG_PATH=$PWD
+          echo ">>>> PKG_CONFIG" $PKG_CONFIG_PATH
+          cat scipy_openblas.pc
+
+      - name: Set and log asv machine configuration
+        run: |
+          asv machine --yes --config asv.conf.json
+          echo "Machine Configuration:"
+          cat ~/.asv-machine.json
+          rm ~/.asv-machine.json
+
+          echo "Setting machine name to $MACHINE_NAME"
+          asv machine --machine $MACHINE_NAME --yes --config $ASV_CONFIG -v
+          cat ~/.asv-machine.json
+
+      - name: Run benchmarks
+        run: |
+          echo ${{ github.workspace}}
+          asv run --config $ASV_CONFIG -v
+        env:
+          PKG_CONFIG_PATH: ${{ github.workspace }}
+
+
