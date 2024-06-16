@@ -68,7 +68,7 @@ jobs:
 
             cp -r $RESULTS_DIR/$MACHINE_NAME/* .asv/results/$MACHINE_NAME/
           else
-            echo "results/ directory does not exist in the benchmarks repository"
+            echo "results/ directory does not exist, creating"
             mkdir -p $RESULTS_DIR
           fi
 
@@ -86,4 +86,15 @@ jobs:
           echo ">>> @ " $RESULTS_DIR_ROOT
           ls -l ~/$RESULTS_DIR_ROOT
 
+      - name: Push benchmarks
+        run: |
+          cd ~/$RESULTS_DIR_ROOT
+          git add .
+          git config --global user.email "project@openblas"
+          git config --global user.name "OB benchmark bot"
+
+          python -c'import scipy_openblas32 as sc; print(sc.__version__, "\n\n", sc.get_openblas_config())' > msg.txt
+          git commit -m "Update benchmarks `cat msg.txt` "
+        #  git push origin main
+          git remote -v
 
