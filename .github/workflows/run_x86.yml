@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-#  GITHUB_TOKEN: ${{ secrets.OB_BENCH_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.AWS_BENCHMARKS }}
   RESULTS_DIR_ROOT: gh_pages 
   ASV_CONFIG: asv.conf.json
   MACHINE_NAME: github-actions-x86  # to identify github actions machine as hostname changes everytime
@@ -57,7 +57,7 @@ jobs:
 
       - name: Copy results to a gh-pages branch clone
         run: |
-          git clone -b gh-pages --single-branch https://github.com/OpenMathLib/BLAS-Benchmarks.git ~/$RESULTS_DIR_ROOT
+          git clone -b gh-pages --single-branch https://$GITHUB_TOKEN@github.com/OpenMathLib/BLAS-Benchmarks.git ~/$RESULTS_DIR_ROOT
           echo ">>>> clone done"
 
           RESULTS_DIR=~/$RESULTS_DIR_ROOT/results
@@ -97,5 +97,7 @@ jobs:
           git commit -m "Update benchmarks `cat msg.txt` "
           #  git push origin main
           git remote -v
-          git push origin:gh-pages
+          git branch
+          git log
+          git push origin
 
