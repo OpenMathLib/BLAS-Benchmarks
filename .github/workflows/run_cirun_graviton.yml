@@ -1,4 +1,4 @@
-name: ASV Benchmark on arm64 graviton cirun
+name: ASV Benchmarks
 
 on:
   push:
@@ -16,18 +16,19 @@ env:
  # GITHUB_TOKEN: ${{ secrets.OB_BENCH_TOKEN }}
  # BENCHMARKS_REPO: ev-br/ob-bench-asv
   ASV_CONFIG: asv.conf.json
-  MACHINE_NAME: cirun-aws-runner-graviton  # to identify github actions machine as hostname changes everytime
 
 jobs:
-  build:
-    if: "github.repository == 'OpenMathLib/BLAS-Benchmarks'"
-    runs-on: "cirun-aws-runner-graviton--${{ github.run_id }}"
-
+  bench:
     strategy:
       fail-fast: false
       matrix:
-        fortran: [gfortran]
-        build: [make]
+        include:
+          # define matrix.name to identify github actions machine as hostname changes everytime
+          - image: "cirun-aws-runner-graviton--${{ github.run_id }}"
+            name: "gh-graviton"
+          - image: "cirun-aws-runner-cascade-lake--${{ github.run_id }}"
+            name: "gh-skylake"
+    runs-on: ${{ matrix.image }}
 
     steps:
       - uses: actions/checkout@v4
@@ -55,19 +56,17 @@ jobs:
 
       - name: Install python dependencies
         run: |
+          # --break-system-packages is required on ubuntu noble
           pip3 install "numpy<2" meson meson-python ninja build asv virtualenv --break-system-packages
-          # pip3 install scipy_openblas32
           # install the nightly OpenBLAS wheel
           pip install -i https://pypi.anaconda.org/scientific-python-nightly-wheels/simple scipy-openblas32 --break-system-packages
           python3 -c'import scipy_openblas32 as so; print(so.get_pkg_config())' > scipy_openblas.pc
-          export PKG_CONFIG_PATH=$PWD
-          echo ">>>> PKG_CONFIG" $PKG_CONFIG_PATH
-          cat scipy_openblas.pc
+          # export PKG_CONFIG_PATH=$PWD
 
-          echo ">>> mesonpy"
-          python3 -c'import mesonpy; print(mesonpy.__file__)'
-          echo $PATH
-          echo $PYTHONPATH
+      - name: Print OpenBLAS information
+        run: |
+          echo "scipy_openblas.pc contents: "
+          cat scipy_openblas.pc
 
       - name: Set and log asv machine configuration
         run: |
@@ -76,16 +75,14 @@ jobs:
           cat ~/.asv-machine.json
           rm ~/.asv-machine.json
 
-          echo "Setting machine name to $MACHINE_NAME"
-          python3 -m asv machine --machine $MACHINE_NAME --yes --config $ASV_CONFIG -v
+          # set the machine name depending on the OS/arch image
+          echo "Setting machine name to ${{ matrix.name }}"
+          python3 -m asv machine --machine ${{ matrix.name }} --yes --config $ASV_CONFIG -v
           cat ~/.asv-machine.json
 
       - name: Run benchmarks
         run: |
-          echo ${{ github.workspace}}
-          python3 -c"import mesonpy; print(mesonpy.__file__)"
           python3 -m asv run --config $ASV_CONFIG -v
         env:
           PKG_CONFIG_PATH: ${{ github.workspace }}
-          PYTHONPATH: ${{ github.workspace }}     # FIXME
 
