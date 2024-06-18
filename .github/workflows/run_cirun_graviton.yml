@@ -141,3 +141,10 @@ jobs:
           git config --global user.name "OB benchmark bot"
           # git commit -m "Update benchmarks"
           asv gh-pages
+
+          # add the results/ directory with historic results
+          git checkout gh-pages
+          cp -r .asv/results results
+          git add results/
+          git commit -am'add results'
+          git push origin HEAD
