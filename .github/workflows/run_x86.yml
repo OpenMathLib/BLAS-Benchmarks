@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  GITHUB_TOKEN: ${{ secrets.AWS_BENCHMARKS }}
+  # GITHUB_TOKEN: ${{ secrets.AWS_BENCHMARKS }}    # DELIBERATE BREAKAGE TO BLOCK THE UPLOAD
   RESULTS_DIR_ROOT: gh_pages 
   ASV_CONFIG: asv.conf.json
   MACHINE_NAME: github-actions-x86  # to identify github actions machine as hostname changes everytime

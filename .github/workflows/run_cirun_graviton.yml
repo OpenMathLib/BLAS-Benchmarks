@@ -83,6 +83,61 @@ jobs:
       - name: Run benchmarks
         run: |
           python3 -m asv run --config $ASV_CONFIG -v
+          ls -l .asv/results
+          echo ">>> results/machine"
+          ls -l .asv/results/${{ matrix.name }}
         env:
           PKG_CONFIG_PATH: ${{ github.workspace }}
 
+      - name: Store/Upload benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.name }}
+          path: .asv/results/*
+          if-no-files-found: error
+
+  combine-and-publish:
+    runs-on: ubuntu-latest
+    needs: bench
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # To fetch all commits to be able to generate benchmarks html
+          token: ${{ secrets.AWS_BENCHMARKS }}
+
+      - name: Collect past runs
+        run: |
+          git checkout gh-pages
+          mkdir -p .asv/resuls
+          cp -r results .asv/results
+
+      - name: Download all artifacts from benchmarking runs
+        uses: actions/download-artifact@v4      
+
+      - name: Combine the runs
+        run: |
+          cp -r gh-skylake/* .asv/results
+          cp -r gh-graviton/* .asv/results
+          ls -l
+          ls -l .asv/results
+          git checkout main
+          ls -l
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Set up ASV and generate the html
+        run: |
+          pip install asv
+          asv machine --yes --config $ASV_CONFIG
+          asv publish --config $ASV_CONFIG -v
+
+      - name: Upload the results
+        run: |
+          git config --global user.email "project@openblas"
+          git config --global user.name "OB benchmark bot"
+          # git commit -m "Update benchmarks"
+          asv gh-pages
