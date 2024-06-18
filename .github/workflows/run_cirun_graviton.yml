@@ -47,7 +47,7 @@ jobs:
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
             sudo apt update
-            sudo apt-get install -y gfortran cmake ccache libtinfo5 python3-pip pkg-config
+            sudo apt-get install -y gfortran cmake ccache python3-pip pkg-config
           else
             echo "::error::$RUNNER_OS not supported"
             exit 1
@@ -55,18 +55,22 @@ jobs:
 
       - name: Install python dependencies
         run: |
-          pip3 install numpy meson meson-python ninja build asv virtualenv
+          pip3 install "numpy<2" meson meson-python ninja build asv virtualenv --break-system-packages
           # pip3 install scipy_openblas32
           # install the nightly OpenBLAS wheel
-          pip install -i https://pypi.anaconda.org/scientific-python-nightly-wheels/simple scipy-openblas32
+          pip install -i https://pypi.anaconda.org/scientific-python-nightly-wheels/simple scipy-openblas32 --break-system-packages
           python3 -c'import scipy_openblas32 as so; print(so.get_pkg_config())' > scipy_openblas.pc
           export PKG_CONFIG_PATH=$PWD
           echo ">>>> PKG_CONFIG" $PKG_CONFIG_PATH
           cat scipy_openblas.pc
 
+          echo ">>> mesonpy"
+          python3 -c'import mesonpy; print(mesonpy.__file__)'
+          echo $PATH
+          echo $PYTHONPATH
+
       - name: Set and log asv machine configuration
         run: |
-          cd benchmark/pybench/asv
           python3 -m asv machine --yes --config asv.conf.json
           echo "Machine Configuration:"
           cat ~/.asv-machine.json
@@ -79,8 +83,9 @@ jobs:
       - name: Run benchmarks
         run: |
           echo ${{ github.workspace}}
-          cd benchmark/pybench/asv
+          python3 -c"import mesonpy; print(mesonpy.__file__)"
           python3 -m asv run --config $ASV_CONFIG -v
         env:
           PKG_CONFIG_PATH: ${{ github.workspace }}
+          PYTHONPATH: ${{ github.workspace }}     # FIXME
 

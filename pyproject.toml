@@ -2,7 +2,9 @@
 build-backend = "mesonpy"
 requires = [
     "meson-python>=0.16.0",
-    "numpy",
+    "meson",
+    "ninja",
+    "numpy<2",
     "scipy_openblas32"
 ]
 

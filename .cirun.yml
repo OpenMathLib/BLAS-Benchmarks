@@ -7,8 +7,8 @@ runners:
     region: "us-east-1"
     # Cheapest VM on AWS
     instance_type: "c7g.large"
-    # Ubuntu-22.04, ami image
-    machine_image: "ami-0a0c8eebcdd6dcbd0"
+    # Ubuntu-24.04, ami image
+    machine_image: "ami-0eac975a54dfee8cb"
     preemptible: false
     # Add this label in the "runs-on" param in .github/workflows/<workflow-name>.yml
     # So that this runner is created for running the workflow
