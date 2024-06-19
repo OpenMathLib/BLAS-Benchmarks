@@ -106,14 +106,14 @@ jobs:
           fetch-depth: 0  # To fetch all commits to be able to generate benchmarks html
           token: ${{ secrets.AWS_BENCHMARKS }}
 
+      - name: Download all artifacts from benchmarking runs
+        uses: actions/download-artifact@v4
+
       - name: Collect past runs
         run: |
           git checkout gh-pages
           mkdir -p .asv/resuls
           cp -r results .asv/results
-
-      - name: Download all artifacts from benchmarking runs
-        uses: actions/download-artifact@v4      
 
       - name: Combine the runs
         run: |
@@ -139,12 +139,11 @@ jobs:
         run: |
           git config --global user.email "project@openblas"
           git config --global user.name "OB benchmark bot"
-          # git commit -m "Update benchmarks"
           asv gh-pages
 
-          # add the results/ directory with historic results
+          # persist the results/ directory with historic results
           git checkout gh-pages
           cp -r .asv/results results
           git add results/
-          git commit -am'add results'
+          git commit -am"add results for `git rev-parse origin/gh-pages`"
           git push origin HEAD
