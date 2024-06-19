@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+  schedule:
+      - cron: "0 */1 * * *"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -13,11 +15,40 @@ permissions:
   contents: read # to fetch code (actions/checkout)
 
 env:
- # GITHUB_TOKEN: ${{ secrets.OB_BENCH_TOKEN }}
- # BENCHMARKS_REPO: ev-br/ob-bench-asv
   ASV_CONFIG: asv.conf.json
+  NAME_PREFIX: gha
 
 jobs:
+
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # To fetch all commits to be able to generate benchmarks html
+          token: ${{ secrets.AWS_BENCHMARKS }}
+
+      - name: Prepare the tracker branch
+        run: |
+          git config --global user.email "project@openblas"
+          git config --global user.name "OB benchmark bot"
+
+          # XXX this assumes the `tracker` branch is the squash-merge from main
+          # revert the past merge and merge the current main instead
+          # (cannot just merge main without a revert because force-pushes to main)
+          git checkout tracker
+          git revert HEAD --no-edit
+
+          # XXX needed locally not on CI?
+          # git commit -am'revert squash-merging main'
+
+          git merge main --squash
+          git commit -am"squash-merge main at `git rev-parse main`"
+          git push origin HEAD
+          git checkout main
+
+
   bench:
     strategy:
       fail-fast: false
@@ -25,10 +56,11 @@ jobs:
         include:
           # define matrix.name to identify github actions machine as hostname changes everytime
           - image: "cirun-aws-runner-graviton--${{ github.run_id }}"
-            name: "gh-graviton"
+            name: "gha-aws-graviton"
           - image: "cirun-aws-runner-cascade-lake--${{ github.run_id }}"
-            name: "gh-skylake"
+            name: "gha-aws-skylake"
     runs-on: ${{ matrix.image }}
+    needs: trigger
 
     steps:
       - uses: actions/checkout@v4
@@ -58,15 +90,21 @@ jobs:
         run: |
           # --break-system-packages is required on ubuntu noble
           pip3 install "numpy<2" meson meson-python ninja build asv virtualenv --break-system-packages
+
           # install the nightly OpenBLAS wheel
-          pip install -i https://pypi.anaconda.org/scientific-python-nightly-wheels/simple scipy-openblas32 --break-system-packages
+          pip3 install -i https://pypi.anaconda.org/scientific-python-nightly-wheels/simple scipy-openblas32 --break-system-packages
+
+          # dump the pkg-config for the ASV build to pick up (cf $PKG_CONFIG_PATH usage under `Run benchmarks`)
           python3 -c'import scipy_openblas32 as so; print(so.get_pkg_config())' > scipy_openblas.pc
-          # export PKG_CONFIG_PATH=$PWD
 
       - name: Print OpenBLAS information
         run: |
           echo "scipy_openblas.pc contents: "
           cat scipy_openblas.pc
+
+          # store the OpenBLAS wheel info to add to the gh-pages commit message
+          echo ${{ matrix.name }}":" > wheel_info
+          python3 -c'import scipy_openblas32 as sc; print(f"version={sc.__version__} - {sc.get_openblas_config()}")' >> wheel_info
 
       - name: Set and log asv machine configuration
         run: |
@@ -82,10 +120,12 @@ jobs:
 
       - name: Run benchmarks
         run: |
+          # asv fails to checkout tracker unless we help it a bit:
+          git checkout tracker
+          git checkout main
+          git branch
+
           python3 -m asv run --config $ASV_CONFIG -v
-          ls -l .asv/results
-          echo ">>> results/machine"
-          ls -l .asv/results/${{ matrix.name }}
         env:
           PKG_CONFIG_PATH: ${{ github.workspace }}
 
@@ -93,8 +133,11 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.name }}
-          path: .asv/results/*
+          path: |
+            .asv/results/*
+            wheel_info
           if-no-files-found: error
+
 
   combine-and-publish:
     runs-on: ubuntu-latest
@@ -112,17 +155,33 @@ jobs:
       - name: Collect past runs
         run: |
           git checkout gh-pages
-          mkdir -p .asv/resuls
-          cp -r results .asv/results
+          mkdir -p .asv/results
+          cp -r results .asv
 
       - name: Combine the runs
         run: |
-          cp -r gh-skylake/* .asv/results
-          cp -r gh-graviton/* .asv/results
-          ls -l
-          ls -l .asv/results
+          # NB artifact names start with gha-
+          artifacts=`ls -d ./$NAME_PREFIX-*`
+          echo "found ARTIFACTS = "$artifacts
+
+          # put the benchmark results to where asv expects them:
+          # .asv/
+          #    results/
+          #      benchmarks.json
+          #      machine-name-1/
+          #        machine.json
+          #        commit_hash-1...json
+          #      machine-name-2/
+          #        machine.json
+          #        commit_hash-1...json
+          for dir in $artifacts; do cp -r $dir/.asv/* .asv; done
+
+          # combine the wheel_info files from the artifacts
+          for dir in $artifacts; do cat $dir/wheel_info >>./wheel_info; done
+          cat wheel_info
+
+          # return to main to be able to generate the new html report
           git checkout main
-          ls -l
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -131,6 +190,9 @@ jobs:
 
       - name: Set up ASV and generate the html
         run: |
+          git checkout tracker
+          git checkout main
+
           pip install asv
           asv machine --yes --config $ASV_CONFIG
           asv publish --config $ASV_CONFIG -v
@@ -145,5 +207,5 @@ jobs:
           git checkout gh-pages
           cp -r .asv/results results
           git add results/
-          git commit -am"add results for `git rev-parse origin/gh-pages`"
+          git commit -am"add results for `git rev-parse origin/gh-pages`" -m"`cat wheel_info`"
           git push origin HEAD
