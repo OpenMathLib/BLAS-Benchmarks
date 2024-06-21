@@ -7,8 +7,9 @@ We use three branches:
 
   - `main` : contains benchmark code, the BLAS/LAPACK wrappers etc. This is the branch
     you want to merge feature branches to;
-  - `gh-pages` : contains the html site + the `results/` from past runs; This branch
-    is auto-updated on each CI run from main;
+  - `gh-pages` : contains the html site + the `results/` from past runs; Commits
+    list the OpenBLAS wheel versions and configurations. This branch is auto-updated on
+    each CI run from main;
   - `tracker` : `asv` benchmarks this branch. Mirrors `main`.
     Is auto-updated on each CI run.
 
