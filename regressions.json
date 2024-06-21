@@ -1,1 +1,1 @@
-{"regressions": []}
+{"regressions": [["benchmarks.Dgemm.time_dgemm(200, 'c')", "graphs/branch-tracker/machine-gha-aws-skylake/python-3.12/benchmarks.Dgemm.time_dgemm.json", {"machine": "gha-aws-skylake"}, 6, 0.0009408327857138537, 0.000802643999999678, [[146, 150, 0.000802643999999678, 0.0009408327857138537]]]]}
