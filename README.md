@@ -5,6 +5,14 @@ Web version:  http://www.openmathlib.org/BLAS-Benchmarks/
 
 Text timings are visible from the [Actions tab](https://github.com/OpenMathLib/BLAS-Benchmarks/actions), for individual arches --- click on an "ASV Benchmarks" workflow run, then select a desired architecture, and expand the "Run benchmarks" section. Here is [one example](https://github.com/OpenMathLib/BLAS-Benchmarks/actions/runs/9616185161/job/26525115646).
 
+
+Benchmark suite
+===============
+
+The suite is similar to the one which runs on PRs to the OpenBLAS repository
+via codspeed: https://github.com/OpenMathLib/OpenBLAS/tree/develop/benchmark/pybench
+
+
 CI orchestration
 ================
 
@@ -39,7 +47,6 @@ benchmarking run.
 Running benchmarks locally
 ==========================
 
-
 To run the benchmark suite locally, first do
 
 ```
@@ -47,7 +54,33 @@ $ python -c "import scipy_openblas32; print(scipy_openblas32.get_pkg_config())" 
 $ export PKG_CONFIG_PATH=$PWD
 ```
 
-and then
+Then either edit `asv.conf.json` to point to the `main` branch:
+
+```diff
+$ git diff
+diff --git a/asv.conf.json b/asv.conf.json
+index ded988b..99e4ff3 100644
+--- a/asv.conf.json
++++ b/asv.conf.json
+@@ -40,7 +40,7 @@
+
+     // List of branches to benchmark. If not provided, defaults to "main"
+     // (for git) or "default" (for mercurial).
+-       "branches": ["tracker"], // for git
++       "branches": ["main"], // for git
+     // "branches": ["default"],    // for mercurial
+```
+
+or update the `tracker` branch to follow `main`:
+
+```
+$ git co tracker
+$ git revert HEAD
+$ git merge --squash main
+$ git co main
+```
+
+Finally, run
 
 ```
 $ asv run -v
