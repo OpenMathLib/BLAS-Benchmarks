@@ -1,7 +1,9 @@
 Results
 =======
 
-http://www.openmathlib.org/BLAS-Benchmarks/
+Web version:  http://www.openmathlib.org/BLAS-Benchmarks/
+
+Text timings are visible from the [Actions tab](https://github.com/OpenMathLib/BLAS-Benchmarks/actions), for individual arches --- click on an "ASV Benchmarks" workflow run, then select a desired architecture, and expand the "Run benchmarks" section. Here is [one example](https://github.com/OpenMathLib/BLAS-Benchmarks/actions/runs/9616185161/job/26525115646).
 
 CI orchestration
 ================
