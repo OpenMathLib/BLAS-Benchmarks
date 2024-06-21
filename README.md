@@ -41,7 +41,7 @@ Running benchmarks locally
 To run the benchmark suite locally, first do
 
 ```
-$ python -c "import scipy_openblas32; print(scipy_openblas32.get_pkg_config())" > openblas.pc
+$ python -c "import scipy_openblas32; print(scipy_openblas32.get_pkg_config())" > scipy_openblas.pc
 $ export PKG_CONFIG_PATH=$PWD
 ```
 
