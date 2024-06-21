@@ -9,7 +9,7 @@ import openblas_wrap as ow
 
 # dnrm2
 
-dnrm2_sizes = [100, 1000]
+dnrm2_sizes = [100, 200, 400, 600, 800, 1000]
 
 def run_dnrm2(n, x, incx, func):
     res = func(x, n, incx=incx)
@@ -33,7 +33,7 @@ class Nrm2:
 
 # ddot
 
-ddot_sizes = [100, 1000]
+ddot_sizes = [100, 200, 400, 600, 800, 1000]
 
 def run_ddot(x, y, func):
     res = func(x, y)
@@ -57,7 +57,7 @@ class DDot:
 
 # daxpy
 
-daxpy_sizes = [100, 1000]
+daxpy_sizes = [100, 200, 400, 600, 800, 1000]
 
 def run_daxpy(x, y, func):
     res = func(x, y, a=2.0)
@@ -83,7 +83,7 @@ class Daxpy:
 
 # dgemm
 
-gemm_sizes = [100, 1000]
+gemm_sizes = [100, 200, 400, 600, 800, 1000]
 
 def run_dgemm(a, b, c, func):
     alpha = 1.0
@@ -108,7 +108,7 @@ class Dgemm:
 
 # dsyrk
 
-syrk_sizes = [100, 1000]
+syrk_sizes = [100, 200, 400, 600, 800, 1000]
 
 
 def run_dsyrk(a, c, func):
@@ -134,7 +134,7 @@ class DSyrk:
 
 # linalg.solve
 
-dgesv_sizes = [100, 1000]
+dgesv_sizes = [100, 200, 400, 600, 800, 1000]
 
 
 def run_dgesv(a, b, func):
@@ -198,7 +198,7 @@ class Dgesdd:
 
 # linalg.eigh
 
-dsyev_sizes = [50, 200]
+dsyev_sizes = [50, 64, 128, 200]
 
 
 def run_dsyev(a, lwork, func):
