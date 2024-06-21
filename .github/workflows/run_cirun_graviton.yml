@@ -59,6 +59,8 @@ jobs:
             name: "gha-aws-graviton"
           - image: "cirun-aws-runner-cascade-lake--${{ github.run_id }}"
             name: "gha-aws-skylake"
+          - image: ubuntu-24.04
+            name: "gha-ubuntu-noble"
     runs-on: ${{ matrix.image }}
     needs: trigger
 
