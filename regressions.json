@@ -1,1 +1,1 @@
-{"regressions": [["benchmarks.Dgesdd.time_dgesdd('100, 5', 'd')", "graphs/branch-tracker/machine-gha-aws-skylake/python-3.12/benchmarks.Dgesdd.time_dgesdd.json", {"machine": "gha-aws-skylake"}, 1, 2.0198960111331532e-05, 1.746880613892874e-05, [[182, 186, 1.746880613892874e-05, 2.0198960111331532e-05]]]]}
+{"regressions": []}
