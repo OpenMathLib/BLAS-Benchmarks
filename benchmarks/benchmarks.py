@@ -4,6 +4,14 @@
 import numpy as np
 import openblas_wrap as ow
 
+dtype_map = {
+    's': np.float32,
+    'd': np.float64,
+    'c': np.complex64,
+    'z': np.complex128,
+    'dz': np.complex128,
+}
+
 
 # ### BLAS level 1 ###
 
@@ -24,7 +32,9 @@ class Nrm2:
 
     def setup(self, n, variant):
         rndm = np.random.RandomState(1234)
-        self.x = rndm.uniform(size=(n,)).astype(float)
+        dtyp = dtype_map[variant]
+
+        self.x = rndm.uniform(size=(n,)).astype(dtyp)
         self.nrm2 = ow.get_func('nrm2', variant)
 
     def time_dnrm2(self, n, variant):
@@ -46,8 +56,10 @@ class DDot:
 
     def setup(self, n):
         rndm = np.random.RandomState(1234)
-        self.x = np.array(rndm.uniform(size=(n,)), dtype=float)
-        self.y = np.array(rndm.uniform(size=(n,)), dtype=float)
+        dtyp = float
+
+        self.x = np.array(rndm.uniform(size=(n,)), dtype=dtyp)
+        self.y = np.array(rndm.uniform(size=(n,)), dtype=dtyp)
         self.func = ow.get_func('dot', 'd')
 
     def time_ddot(self, n):
@@ -70,8 +82,10 @@ class Daxpy:
 
     def setup(self, n, variant):
         rndm = np.random.RandomState(1234)
-        self.x = np.array(rndm.uniform(size=(n,)), dtype=float)
-        self.y = np.array(rndm.uniform(size=(n,)), dtype=float)
+        dtyp = dtype_map[variant]
+
+        self.x = np.array(rndm.uniform(size=(n,)), dtype=dtyp)
+        self.y = np.array(rndm.uniform(size=(n,)), dtype=dtyp)
         self.axpy = ow.get_func('axpy', variant)
 
     def time_daxpy(self, n, variant):
@@ -97,9 +111,11 @@ class Dgemm:
 
     def setup(self, n, variant):
         rndm = np.random.RandomState(1234)
-        self.a = np.array(rndm.uniform(size=(n, n)), dtype=float, order='F')
-        self.b = np.array(rndm.uniform(size=(n, n)), dtype=float, order='F')
-        self.c = np.empty((n, n), dtype=float, order='F')
+        dtyp = dtype_map[variant]
+
+        self.a = np.array(rndm.uniform(size=(n, n)), dtype=dtyp, order='F')
+        self.b = np.array(rndm.uniform(size=(n, n)), dtype=dtyp, order='F')
+        self.c = np.empty((n, n), dtype=dtyp, order='F')
         self.func = ow.get_func('gemm', variant)
 
     def time_dgemm(self, n, variant):
@@ -122,8 +138,10 @@ class DSyrk:
 
     def setup(self, n, variant):
         rndm = np.random.RandomState(1234)
-        self.a = np.array(rndm.uniform(size=(n, n)), dtype=float, order='F')
-        self.c = np.empty((n, n), dtype=float, order='F')
+        dtyp = dtype_map[variant]
+
+        self.a = np.array(rndm.uniform(size=(n, n)), dtype=dtyp, order='F')
+        self.c = np.empty((n, n), dtype=dtyp, order='F')
         self.func = ow.get_func('syrk', variant)
 
     def time_dsyrk(self, n, variant):
@@ -148,9 +166,11 @@ class Dgesv:
 
     def setup(self, n, variant):
         rndm = np.random.RandomState(1234)
-        self.a = (np.array(rndm.uniform(size=(n, n)), dtype=float, order='F') +
-                  np.eye(n, order='F'))
-        self.b = np.array(rndm.uniform(size=(n, 1)), order='F')
+        dtyp = dtype_map[variant]
+
+        self.a = (np.array(rndm.uniform(size=(n, n)), dtype=dtyp, order='F') +
+                  np.eye(n, dtype=dtyp, order='F'))
+        self.b = np.array(rndm.uniform(size=(n, 1)), dtype=dtyp, order='F')
         self.func = ow.get_func('gesv', variant)
 
     def time_dgesv(self, n, variant):
@@ -181,7 +201,9 @@ class Dgesdd:
         m, n = (int(x) for x in mn.split(","))
 
         rndm = np.random.RandomState(1234)
-        a = np.array(rndm.uniform(size=(m, n)), dtype=float, order='F')
+        dtyp = dtype_map[variant]
+
+        a = np.array(rndm.uniform(size=(m, n)), dtype=dtyp, order='F')
 
         gesdd_lwork = ow.get_func('gesdd_lwork', variant)
 
@@ -212,8 +234,10 @@ class Dsyev:
 
     def setup(self, n, variant):
         rndm = np.random.RandomState(1234)
+        dtyp = dtype_map[variant]
+
         a = rndm.uniform(size=(n, n))
-        a = np.asarray(a + a.T, dtype=float, order='F')
+        a = np.asarray(a + a.T, dtype=dtyp, order='F')
         a_ = a.copy()
 
         syev_lwork = ow.get_func('syev_lwork', variant)
