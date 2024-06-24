@@ -1,1 +1,1 @@
-{"regressions": []}
+{"regressions": [["benchmarks.dot.time_dot(400)", "graphs/branch-tracker/machine-gha-ubuntu-noble/python-3.12/benchmarks.dot.time_dot.json", {"machine": "gha-ubuntu-noble"}, 2, 4.353964593386789e-07, 4.031092157698227e-07, [[255, 259, 4.1070764203681504e-07, 4.353964593386789e-07]]]]}
