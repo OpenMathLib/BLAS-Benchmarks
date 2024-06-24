@@ -15,11 +15,11 @@ dtype_map = {
 
 # ### BLAS level 1 ###
 
-# dnrm2
+# nrm2
 
-dnrm2_sizes = [100, 200, 400, 600, 800, 1000]
+nrm2_sizes = [100, 200, 400, 600, 800, 1000]
 
-def run_dnrm2(n, x, incx, func):
+def run_nrm2(n, x, incx, func):
     res = func(x, n, incx=incx)
     return res
 
@@ -27,7 +27,7 @@ def run_dnrm2(n, x, incx, func):
 
 class Nrm2:
 
-    params = [dnrm2_sizes, ['d', 'dz']]
+    params = [nrm2_sizes, ['d', 'dz']]
     param_names = ["size", "variant"]
 
     def setup(self, n, variant):
@@ -37,21 +37,21 @@ class Nrm2:
         self.x = rndm.uniform(size=(n,)).astype(dtyp)
         self.nrm2 = ow.get_func('nrm2', variant)
 
-    def time_dnrm2(self, n, variant):
-        run_dnrm2(n, self.x, 1, self.nrm2)
+    def time_nrm2(self, n, variant):
+        run_nrm2(n, self.x, 1, self.nrm2)
 
 
-# ddot
+# dot
 
-ddot_sizes = [100, 200, 400, 600, 800, 1000]
+dot_sizes = [100, 200, 400, 600, 800, 1000]
 
-def run_ddot(x, y, func):
+def run_dot(x, y, func):
     res = func(x, y)
     return res
 
 
-class DDot:
-    params = ddot_sizes
+class dot:
+    params = dot_sizes
     param_names = ["size"]
 
     def setup(self, n):
@@ -62,22 +62,22 @@ class DDot:
         self.y = np.array(rndm.uniform(size=(n,)), dtype=dtyp)
         self.func = ow.get_func('dot', 'd')
 
-    def time_ddot(self, n):
-        run_ddot(self.x, self.y, self.func)
+    def time_dot(self, n):
+        run_dot(self.x, self.y, self.func)
 
 
 
-# daxpy
+# axpy
 
-daxpy_sizes = [100, 200, 400, 600, 800, 1000]
+axpy_sizes = [100, 200, 400, 600, 800, 1000]
 
-def run_daxpy(x, y, func):
+def run_axpy(x, y, func):
     res = func(x, y, a=2.0)
     return res
 
 
-class Daxpy:
-    params = [daxpy_sizes, ['s', 'd', 'c', 'z']]
+class axpy:
+    params = [axpy_sizes, ['s', 'd', 'c', 'z']]
     param_names = ["size", "variant"]
 
     def setup(self, n, variant):
@@ -88,24 +88,24 @@ class Daxpy:
         self.y = np.array(rndm.uniform(size=(n,)), dtype=dtyp)
         self.axpy = ow.get_func('axpy', variant)
 
-    def time_daxpy(self, n, variant):
-        run_daxpy(self.x, self.y, self.axpy)
+    def time_axpy(self, n, variant):
+        run_axpy(self.x, self.y, self.axpy)
 
 
 
 # ### BLAS level 3 ###
 
-# dgemm
+# gemm
 
 gemm_sizes = [100, 200, 400, 600, 800, 1000]
 
-def run_dgemm(a, b, c, func):
+def run_gemm(a, b, c, func):
     alpha = 1.0
     res = func(alpha, a, b, c=c, overwrite_c=True)
     return res
 
 
-class Dgemm:
+class gemm:
     params = [gemm_sizes, ['s', 'd', 'c', 'z']]
     param_names = ["size", 'variant']
 
@@ -118,21 +118,21 @@ class Dgemm:
         self.c = np.empty((n, n), dtype=dtyp, order='F')
         self.func = ow.get_func('gemm', variant)
 
-    def time_dgemm(self, n, variant):
-        run_dgemm(self.a, self.b, self.c, self.func)
+    def time_gemm(self, n, variant):
+        run_gemm(self.a, self.b, self.c, self.func)
 
 
-# dsyrk
+# syrk
 
 syrk_sizes = [100, 200, 400, 600, 800, 1000]
 
 
-def run_dsyrk(a, c, func):
+def run_syrk(a, c, func):
     res = func(1.0, a, c=c, overwrite_c=True)
     return res
 
 
-class DSyrk:
+class syrk:
     params = [syrk_sizes, ['s', 'd', 'c', 'z']]
     param_names = ["size", "variant"]
 
@@ -144,24 +144,24 @@ class DSyrk:
         self.c = np.empty((n, n), dtype=dtyp, order='F')
         self.func = ow.get_func('syrk', variant)
 
-    def time_dsyrk(self, n, variant):
-        run_dsyrk(self.a, self.c, self.func)
+    def time_syrk(self, n, variant):
+        run_syrk(self.a, self.c, self.func)
 
 
 # ### LAPACK ###
 
 # linalg.solve
 
-dgesv_sizes = [100, 200, 400, 600, 800, 1000]
+gesv_sizes = [100, 200, 400, 600, 800, 1000]
 
 
-def run_dgesv(a, b, func):
+def run_gesv(a, b, func):
     res = func(a, b, overwrite_a=True, overwrite_b=True)
     return res
 
 
-class Dgesv:
-    params = [dgesv_sizes, ['s', 'd', 'c', 'z']]
+class gesv:
+    params = [gesv_sizes, ['s', 'd', 'c', 'z']]
     param_names = ["size", "variant"]
 
     def setup(self, n, variant):
@@ -173,8 +173,8 @@ class Dgesv:
         self.b = np.array(rndm.uniform(size=(n, 1)), dtype=dtyp, order='F')
         self.func = ow.get_func('gesv', variant)
 
-    def time_dgesv(self, n, variant):
-        run_dgesv(self.a, self.b, self.func)
+    def time_gesv(self, n, variant):
+        run_gesv(self.a, self.b, self.func)
 
       # XXX: how to run asserts?
       #  lu, piv, x, info = benchmark(run_gesv, a, b)
@@ -185,16 +185,16 @@ class Dgesv:
 
 # linalg.svd
 
-dgesdd_sizes = ["100, 5", "1000, 222"]
+gesdd_sizes = ["100, 5", "1000, 222"]
 
 
-def run_dgesdd(a, lwork, func):
+def run_gesdd(a, lwork, func):
     res = func(a, lwork=lwork, full_matrices=False, overwrite_a=False)
     return res
 
 
-class Dgesdd:
-    params = [dgesdd_sizes, ['s', 'd']]
+class gesdd:
+    params = [gesdd_sizes, ['s', 'd']]
     param_names = ["(m, n)", "variant"]
 
     def setup(self, mn, variant):
@@ -214,22 +214,22 @@ class Dgesdd:
         self.a, self.lwork = a, lwork
         self.func = ow.get_func('gesdd', variant)
 
-    def time_dgesdd(self, mn, variant):
-        run_dgesdd(self.a, self.lwork, self.func)
+    def time_gesdd(self, mn, variant):
+        run_gesdd(self.a, self.lwork, self.func)
 
 
 # linalg.eigh
 
-dsyev_sizes = [50, 64, 128, 200]
+syev_sizes = [50, 64, 128, 200]
 
 
-def run_dsyev(a, lwork, func):
+def run_syev(a, lwork, func):
     res = func(a, lwork=lwork, overwrite_a=True)
     return res
 
 
-class Dsyev:
-    params = [dsyev_sizes, ['s', 'd']]
+class syev:
+    params = [syev_sizes, ['s', 'd']]
     param_names = ["size", "variant"]
 
     def setup(self, n, variant):
@@ -249,6 +249,6 @@ class Dsyev:
         self.lwork = lwork
         self.func = ow.get_func('syev', variant)
 
-    def time_dsyev(self, n, variant):
-        run_dsyev(self.a, self.lwork, self.func)
+    def time_syev(self, n, variant):
+        run_syev(self.a, self.lwork, self.func)
 
