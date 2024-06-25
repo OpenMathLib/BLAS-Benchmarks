@@ -1,1 +1,1 @@
-{"regressions": [["benchmarks.axpy.time_axpy(100, 'd')", "graphs/branch-tracker/machine-gha-aws-skylake/python-3.12/benchmarks.axpy.time_axpy.json", {"machine": "gha-aws-skylake"}, 1, 8.119451273694513e-07, 7.633661302621939e-07, [[272, 276, 7.633661302621939e-07, 8.119451273694513e-07]]]]}
+{"regressions": []}
