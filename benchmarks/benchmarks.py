@@ -93,6 +93,33 @@ class axpy:
 
 
 
+# ### BLAS level 2 ###
+
+gemv_sizes = [100, 200, 400, 600, 800, 1000]
+
+def run_gemv(a, x, y, func):
+    res = func(1.0, a, x, y=y)
+    return res
+
+
+class gemv:
+    params = [gemv_sizes, ['s', 'd', 'c', 'z']]
+    param_names = ["size", "variant"]
+
+    def setup(self, n, variant):
+        rndm = np.random.RandomState(1234)
+        dtyp = dtype_map[variant]
+
+        self.a = np.array(rndm.uniform(size=(n,n)), dtype=dtyp)
+        self.x = np.array(rndm.uniform(size=(n,)), dtype=dtyp)
+        self.y = np.zeros(n, dtype=dtyp)
+
+        self.gemv = ow.get_func('gemv', variant)
+
+    def time_gemv(self, n, variant):
+        run_gemv(self.a, self.x, self.y, self.gemv)
+
+
 # ### BLAS level 3 ###
 
 # gemm
