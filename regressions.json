@@ -1,1 +1,1 @@
-{"regressions": []}
+{"regressions": [["benchmarks.gbmv.time_gbmv(200, 'c', 1)", "graphs/branch-tracker/machine-gha-ubuntu-noble/python-3.12/benchmarks.gbmv.time_gbmv.json", {"machine": "gha-ubuntu-noble"}, 18, 4.72563292460794e-06, 3.308239564441731e-06, [[323, 328, 3.308239564441731e-06, 4.72563292460794e-06]]]]}
