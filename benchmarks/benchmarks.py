@@ -98,7 +98,7 @@ class axpy:
 gemv_sizes = [100, 200, 400, 600, 800, 1000]
 
 def run_gemv(a, x, y, func):
-    res = func(1.0, a, x, y=y)
+    res = func(1.0, a, x, y=y, overwrite_y=True)
     return res
 
 
