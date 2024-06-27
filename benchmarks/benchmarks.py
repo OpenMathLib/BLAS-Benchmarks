@@ -95,6 +95,8 @@ class axpy:
 
 # ### BLAS level 2 ###
 
+# gemv
+
 gemv_sizes = [100, 200, 400, 600, 800, 1000]
 
 def run_gemv(a, x, y, func):
@@ -118,6 +120,37 @@ class gemv:
 
     def time_gemv(self, n, variant):
         run_gemv(self.a, self.x, self.y, self.gemv)
+
+
+# gbmv
+
+gbmv_sizes = [100, 200, 400, 600, 800, 1000]
+
+def run_gbmv(m, n, kl, ku, a, x, y, func):
+    res = func(m, n, kl, ku, 1.0, a, x, y=y, overwrite_y=True)
+    return res
+
+
+class gbmv:
+    params = [gbmv_sizes, ['s', 'd', 'c', 'z'], [1, 2, 3]]
+    param_names = ["size", "variant", "kl"]
+
+    def setup(self, n, variant, kl):
+        rndm = np.random.RandomState(1234)
+        dtyp = dtype_map[variant]
+
+        self.x = np.array(rndm.uniform(size=(n,)), dtype=dtyp)
+        self.y = np.empty(n, dtype=dtyp)
+
+        self.m = n
+
+        a = rndm.uniform(size=(2*kl + 1, n))
+        self.a = np.array(a, dtype=dtyp, order='F')
+
+        self.gbmv = ow.get_func('gbmv', variant)
+
+    def time_gbmv(self, n, variant, kl):
+        run_gbmv(self.m, n, kl, kl, self.a, self.x, self.y, self.gbmv)
 
 
 # ### BLAS level 3 ###
