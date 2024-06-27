@@ -1,1 +1,1 @@
-{"regressions": [["benchmarks.gemm.time_gemm(100, 'd')", "graphs/branch-tracker/machine-gha-aws-skylake/python-3.12/benchmarks.gemm.time_gemm.json", {"machine": "gha-aws-skylake"}, 1, 4.8187875478932735e-05, 4.1125211790376534e-05, [[294, 298, 4.1125211790376534e-05, 4.8187875478932735e-05]]]]}
+{"regressions": []}
