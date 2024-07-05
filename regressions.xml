@@ -4,5 +4,5 @@
                 Latest value: 919ns (5.30% worse
                 than best value 873ns).</content></entry><entry><id>tag:BLAS-Benchmarks.asv,2024-06-27:/5710c8d45abbdb8befe37e214357940a033437296f4746be76ea4c64fb7e3662</id><title xml:lang="en">15.34% benchmarks.gbmv.time_gbmv(1000, 'd', 2)</title><updated>2024-06-27T12:28:18Z</updated><link href="index.html#benchmarks.gbmv.time_gbmv?machine=gha-aws-skylake&amp;p-size=1000&amp;p-variant=%27d%27&amp;p-kl=2&amp;commits=42efa6ad8e72dd2c3e1156b563c141ace159f99b-abd111cb2a22a8370a89e89e33cf78d581b59a3c" /><content xml:lang="en" type="html">&lt;a href="index.html#benchmarks.gbmv.time_gbmv?machine=gha-aws-skylake&amp;p-size=1000&amp;p-variant=%27d%27&amp;p-kl=2&amp;commits=42efa6ad8e72dd2c3e1156b563c141ace159f99b-abd111cb2a22a8370a89e89e33cf78d581b59a3c"&gt;15.34% regression&lt;/a&gt; on 2024-06-27 12:26:27 in commits &lt;a href="#42efa6ad8e72dd2c3e1156b563c141ace159f99b"&gt;42efa6ad...abd111cb&lt;/a&gt;.&lt;br&gt;
                 New value: 14.6μs, old value: 12.7μs.&lt;br&gt;
-                Latest value: 14.7μs (15.73% worse
+                Latest value: 14.7μs (15.78% worse
                 than best value 12.7μs).</content></entry></feed>
